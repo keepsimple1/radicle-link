@@ -38,8 +38,11 @@ use super::{packwriter::PackWriter, remote_git_version, transport};
 //
 // cf. https://lore.kernel.org/git/CD2XNXHACAXS.13J6JTWZPO1JA@schmidt/
 // Fixed in `git.git` 1ab13eb, which should land in 2.34
+//
+// Based on testing with git 2.25.1 in Ubuntu 20.04, this workaround is
+// not needed. Hence the checked version is lowered to 2.25.0.
 fn must_namespace_want_ref(caps: &client::Capabilities) -> bool {
-    static FIXED_AFTER: Lazy<Version> = Lazy::new(|| Version::new("2.33.0").unwrap());
+    static FIXED_AFTER: Lazy<Version> = Lazy::new(|| Version::new("2.25.0").unwrap());
 
     remote_git_version(caps)
         .map(|version| version <= *FIXED_AFTER)
