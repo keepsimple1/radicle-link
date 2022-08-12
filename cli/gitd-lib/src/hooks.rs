@@ -227,7 +227,7 @@ where
     E: std::error::Error + Send + 'static,
 {
     // Update `rad/signed_refs`
-    report(reporter, "updating signed refs").await?;
+    report(reporter, "hooks: updating signed refs").await?;
     let update_result = {
         let storage = pool.get().await?;
         spawner

@@ -138,10 +138,10 @@ impl Replication {
                 });
 
                 if have_urn {
-                    debug!("pull");
+                    tracing::warn!("pull");
                     link_replication::pull(&mut cx, limit, remote_id, whoami)
                 } else {
-                    debug!("clone");
+                    tracing::warn!("clone");
                     link_replication::clone(&mut cx, limit, remote_id, whoami)
                 }
             })

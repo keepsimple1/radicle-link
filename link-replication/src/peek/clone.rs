@@ -93,6 +93,10 @@ impl UpdateTips for ForClone {
             cx,
             s.id_tips()
                 .get(&self.remote_id)
+                .or_else(|| { 
+                    println!("Failed to find remote_id {} in id_tips", &self.remote_id);
+                    None
+                })
                 .expect("BUG: `pre_validate` must ensure we got a rad/id ref"),
             s.lookup_delegations(&self.remote_id),
         )

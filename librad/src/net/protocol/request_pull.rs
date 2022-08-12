@@ -112,9 +112,13 @@ where
         use crate::git::storage::ReadOnlyStorage as _;
         use link_replication::Updated;
 
+        tracing::info!("begins replicate");
         let repl = replication::Replication::new(&self.paths, replication::Config::default())?;
+        tracing::info!("replication new: {:?}", &self.paths);
         let storage = self.storage.get().await?;
+        tracing::info!("storage get");
         let succ = repl.replicate(spawner, storage, conn, urn, None).await?;
+        tracing::info!("replicate done");
 
         let storage = self.storage.get().await?;
         succ.updated_refs()

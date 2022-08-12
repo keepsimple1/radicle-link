@@ -18,7 +18,7 @@ use std::{
 
 /// This test is inspired by https://github.com/alexjg/linkd-playground
 #[test]
-fn happy_path_to_push_changes() {
+fn two_peers_and_a_seed() {
     let peer1_home = "/tmp/link-local-1";
     let peer2_home = "/tmp/link-local-2";
     let seed_home = "/tmp/seed-home";
@@ -119,12 +119,12 @@ fn happy_path_to_push_changes() {
     let manifest_path = manifest_path();
     let mut linkd = spawn_linkd(seed_home, &manifest_path);
 
-    println!("\n== Start the peer 1 gitd ==\n");
-    let (is_parent, peer1_peer_id) = run_lnk(LnkCmd::ProfilePeer, peer1_home, passphrase);
-    if !is_parent {
-        return;
-    }
-    let mut lnk_gitd = spawn_lnk_gitd(peer1_home, &manifest_path, &peer1_peer_id);
+    // println!("\n== Start the peer 1 gitd ==\n");
+    // let (is_parent, peer1_peer_id) = run_lnk(LnkCmd::ProfilePeer, peer1_home, passphrase);
+    // if !is_parent {
+    //     return;
+    // }
+    // let mut lnk_gitd = spawn_lnk_gitd(peer1_home, &manifest_path, &peer1_peer_id);
 
     println!("\n== Make some changes in the repo ==\n");
     env::set_current_dir(&peer1_proj).unwrap();
@@ -155,8 +155,10 @@ fn happy_path_to_push_changes() {
 
     clean_up_known_hosts();
 
-    linkd.kill().ok();
-    lnk_gitd.kill().ok();
+    // _run_git_push();
+
+    // linkd.kill().ok();
+    // lnk_gitd.kill().ok();
 }
 
 enum LnkCmd {
@@ -274,13 +276,20 @@ fn run_lnk(cmd: LnkCmd, lnk_home: &str, passphrase: &[u8]) -> (bool, String) {
 fn spawn_linkd(lnk_home: &str, manifest_path: &str) -> Child {
     let log_name = format!("linkd_{}.log", &timestamp());
     let log_file = File::create(&log_name).unwrap();
-    let child = Command::new("cargo")
-        .arg("run")
-        .arg("--manifest-path")
-        .arg(manifest_path)
-        .arg("-p")
-        .arg("linkd")
-        .arg("--")
+
+    Command::new("cargo")
+    .arg("build")
+    .arg("--target-dir")
+    .arg("./target")
+    .arg("--manifest-path")
+    .arg(manifest_path)
+    .arg("-p")
+    .arg("linkd")
+    .output()
+    .expect("cargo build linkd failed");
+
+    let child = Command::new("./target/debug/linkd")
+        .env("RUST_BACKTRACE", "1")
         .arg("--lnk-home")
         .arg(lnk_home)
         .arg("--track")
