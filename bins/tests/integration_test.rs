@@ -119,12 +119,12 @@ fn two_peers_and_a_seed() {
     let manifest_path = manifest_path();
     let mut linkd = spawn_linkd(seed_home, &manifest_path);
 
-    // println!("\n== Start the peer 1 gitd ==\n");
-    // let (is_parent, peer1_peer_id) = run_lnk(LnkCmd::ProfilePeer, peer1_home, passphrase);
-    // if !is_parent {
-    //     return;
-    // }
-    // let mut lnk_gitd = spawn_lnk_gitd(peer1_home, &manifest_path, &peer1_peer_id);
+    println!("\n== Start the peer 1 gitd ==\n");
+    let (is_parent, peer1_peer_id) = run_lnk(LnkCmd::ProfilePeer, peer1_home, passphrase);
+    if !is_parent {
+        return;
+    }
+    let mut lnk_gitd = spawn_lnk_gitd(peer1_home, &manifest_path, &peer1_peer_id);
 
     println!("\n== Make some changes in the repo ==\n");
     env::set_current_dir(&peer1_proj).unwrap();
@@ -155,10 +155,10 @@ fn two_peers_and_a_seed() {
 
     clean_up_known_hosts();
 
-    // _run_git_push();
+    run_git_push();
 
-    // linkd.kill().ok();
-    // lnk_gitd.kill().ok();
+    linkd.kill().ok();
+    lnk_gitd.kill().ok();
 }
 
 enum LnkCmd {
@@ -276,11 +276,13 @@ fn run_lnk(cmd: LnkCmd, lnk_home: &str, passphrase: &[u8]) -> (bool, String) {
 fn spawn_linkd(lnk_home: &str, manifest_path: &str) -> Child {
     let log_name = format!("linkd_{}.log", &timestamp());
     let log_file = File::create(&log_name).unwrap();
+    let target_dir = bins_target_dir();
+    let exec_path = format!("{}/debug/linkd", &target_dir);
 
     Command::new("cargo")
     .arg("build")
     .arg("--target-dir")
-    .arg("./target")
+    .arg(&target_dir)
     .arg("--manifest-path")
     .arg(manifest_path)
     .arg("-p")
@@ -288,7 +290,7 @@ fn spawn_linkd(lnk_home: &str, manifest_path: &str) -> Child {
     .output()
     .expect("cargo build linkd failed");
 
-    let child = Command::new("./target/debug/linkd")
+    let child = Command::new(&exec_path)
         .env("RUST_BACKTRACE", "1")
         .arg("--lnk-home")
         .arg(lnk_home)
@@ -310,11 +312,13 @@ fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, peer_id: &str) -> Child {
     let port = "9987";
     let xdg_runtime_dir = env!("XDG_RUNTIME_DIR");
     let rpc_socket = format!("{}/link-peer-{}-rpc.socket", xdg_runtime_dir, peer_id);
+    let target_dir = bins_target_dir();
+    let exec_path = format!("{}/debug/lnk-gitd", &target_dir);
 
     Command::new("cargo")
         .arg("build")
         .arg("--target-dir")
-        .arg("./target")
+        .arg(&target_dir)
         .arg("--manifest-path")
         .arg(manifest_path)
         .arg("-p")
@@ -330,7 +334,7 @@ fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, peer_id: &str) -> Child {
         .arg("SSH_AUTH_SOCK")
         .arg("-E")
         .arg("RUST_BACKTRACE")
-        .arg("./target/debug/lnk-gitd")
+        .arg(&exec_path)
         .arg(lnk_home)
         .arg("--linkd-rpc-socket")
         .arg(rpc_socket)
@@ -349,7 +353,7 @@ fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, peer_id: &str) -> Child {
 
 /// Returns true if this is the parent process,
 /// returns false if this is the child process.
-fn _run_git_push() -> bool {
+fn run_git_push() -> bool {
     let fork = Fork::from_ptmx().unwrap();
     if let Some(mut parent) = fork.is_parent().ok() {
         let yes = b"yes\n";
@@ -384,6 +388,12 @@ fn timestamp() -> u128 {
 fn manifest_path() -> String {
     let package_dir = env!("CARGO_MANIFEST_DIR");
     format!("{}/Cargo.toml", package_dir.strip_suffix("/tests").unwrap())
+}
+
+/// Returns the full path of `bins/target`.
+fn bins_target_dir() -> String {
+    let package_dir = env!("CARGO_MANIFEST_DIR");
+    format!("{}/target", package_dir.strip_suffix("/tests").unwrap())
 }
 
 fn clean_up_known_hosts() {
