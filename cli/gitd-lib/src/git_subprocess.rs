@@ -98,7 +98,7 @@ where
         }
     }
 
-    tracing::warn!("this service is not uplaod");
+    tracing::warn!("==== this service is not uplaod ====");
     let mut git = {
         let storage = pool.get().await.map_err(|e| {
             tracing::error!(err=?e, "error opening storage pool");
@@ -113,6 +113,8 @@ where
                 Error::Unexpected(Box::new(e))
             })?
     };
+
+    tracing::warn!("*** will spawn command: {:?}", &git);
 
     let mut child = match git
         .arg(".")

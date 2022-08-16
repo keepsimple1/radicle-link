@@ -97,7 +97,7 @@ impl DelegateBlocking for LsRefs {
             arg.push_str(prefix);
             args.push(arg)
         }
-        println!("prepare_ls_refs: args are {:?}", &args);
+        println!("link-git::protocol::ls.rs: prepare_ls_refs: args are {:?}", &args);
 
         Ok(LsRefsAction::Continue)
     }
@@ -109,7 +109,7 @@ impl DelegateBlocking for LsRefs {
         _: &mut Vec<(&str, Option<&str>)>,
         refs: &[Ref],
     ) -> io::Result<Action> {
-        println!("prepare_fetch refs: {:?}", refs);
+        println!("link-git::protocol::ls.rs: prepare_fetch refs: {:?}", refs);
         self.out.extend_from_slice(refs);
         Ok(Action::Cancel)
     }
@@ -142,7 +142,7 @@ where
     R: AsyncRead + Unpin,
     W: AsyncWrite + Unpin,
 {
-    println!("ls.rs: ls_refs: opt: {:?}", &opt);
+    println!("link-git::protocol::ls.rs: ls_refs: opt: {:?}. +++ will call git_protocol::fetch", &opt);
     let mut conn = transport::Stateless::new(opt.repo.clone(), recv, send);
     let mut delegate = LsRefs::new(opt);
     git_protocol::fetch(
@@ -155,6 +155,6 @@ where
     .await
     .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
 
-    println!("ls.rs: ls_refs: delegate.out: {:?}", &delegate.out);
+    println!("link-git::protocol::ls.rs: ls_refs: delegate.out: {:?}", &delegate.out);
     Ok(delegate.out)
 }

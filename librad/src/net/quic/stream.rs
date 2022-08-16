@@ -146,7 +146,10 @@ impl AsyncRead for RecvStream {
         if let Poll::Ready(ready) = &res {
             match ready {
                 Err(e) => this.on_stream_error(e),
-                Ok(_) => this.tickle(),
+                Ok(_) => { 
+                    println!("\nlibrad::net::quic::stream read buf: {}\n", String::from_utf8_lossy(buf));
+                    this.tickle()
+                }
             }
         }
 
@@ -201,6 +204,7 @@ impl RemoteAddr for SendStream {
 
 impl AsyncWrite for SendStream {
     fn poll_write(self: Pin<&mut Self>, cx: &mut Context, buf: &[u8]) -> Poll<io::Result<usize>> {
+        println!("\nlibrad::net::quic::SendStream::poll_write buf {}\n", String::from_utf8_lossy(buf));
         let this = self.get_mut();
         let res = AsyncWrite::poll_write(Pin::new(&mut this.send), cx, buf);
 

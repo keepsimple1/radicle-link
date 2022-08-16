@@ -121,6 +121,7 @@ impl<const R: usize> Endpoint<R> {
         S: Signer + Clone + Send + Sync + 'static,
         S::Error: std::error::Error + Send + Sync + 'static,
     {
+        tracing::info!("Endpoint::bind listen_addr: {}", &listen_addr);
         let peer_id = PeerId::from_signer(&signer);
 
         let sock = bind_socket(listen_addr)?;

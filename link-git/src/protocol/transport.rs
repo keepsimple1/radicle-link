@@ -28,7 +28,7 @@ where
 {
     pub fn new(repo: BString, recv: R, send: W) -> Self {
         let url = format!("rad://{}", repo);
-        println!("transport::Stateless::new url {}", &url);
+        println!("link-git::protocol::transport::Stateless::new url {}", &url);
         let inner = Connection::new(
             recv,
             send,
@@ -53,7 +53,7 @@ where
         write_mode: client::WriteMode,
         on_into_read: client::MessageKind,
     ) -> Result<client::RequestWriter<'_>, client::Error> {
-        println!("transport: write_mode {:?} on_into_read {:?}", &write_mode, &on_into_read);
+        println!("link-git::protocol::transport.rs: write_mode {:?} on_into_read {:?}", &write_mode, &on_into_read);
         self.inner.request(write_mode, on_into_read)
     }
 
@@ -81,6 +81,7 @@ where
         service: Service,
         extra_parameters: &'a [(&'a str, Option<&'a str>)],
     ) -> Result<SetServiceResponse<'_>, client::Error> {
+        println!("link-git::protocol::transport.rs: handshake");
         self.inner.handshake(service, extra_parameters).await
     }
 }

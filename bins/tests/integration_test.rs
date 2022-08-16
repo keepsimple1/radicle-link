@@ -117,7 +117,7 @@ fn two_peers_and_a_seed() {
 
     println!("\n== Start the seed linkd ==\n");
     let manifest_path = manifest_path();
-    let mut linkd = spawn_linkd(seed_home, &manifest_path);
+    // let mut linkd = spawn_linkd(seed_home, &manifest_path);
 
     println!("\n== Start the peer 1 gitd ==\n");
     // let (is_parent, peer1_peer_id) = run_lnk(LnkCmd::ProfilePeer, peer1_home, passphrase);

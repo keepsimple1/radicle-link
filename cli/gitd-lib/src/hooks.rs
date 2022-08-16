@@ -77,6 +77,7 @@ where
         E: std::error::Error + Send + 'static,
         P: ProgressReporter<Error = E>,
     {
+        tracing::warn!("post_receive: request_pull: {}", self.post_receive.request_pull);
         if self.post_receive.request_pull {
             tracing::info!("executing request-pull");
             request_pull(reporter, &self.client, &self.seeds, urn.clone()).await?;
@@ -228,6 +229,7 @@ where
     P: ProgressReporter<Error = E>,
     E: std::error::Error + Send + 'static,
 {
+    tracing::info!("hooks: update_signed_refs urn {}", &urn);
     // Update `rad/signed_refs`
     report(reporter, "hooks: updating signed refs").await?;
     let update_result = {
@@ -284,6 +286,7 @@ where
                 while let Some(resp) = request.next().await {
                     match resp {
                         Ok(request_pull::Response::Success(s)) => {
+                            report(reporter, "request-pull: response success").await?;
                             report(reporter, progress::Namespaced::new(&urn, &s)).await?;
                             break;
                         },
@@ -293,6 +296,7 @@ where
                             break;
                         },
                         Ok(request_pull::Response::Progress(p)) => {
+                            report(reporter, "request-pull: response progress").await?;
                             report(reporter, p.message).await?
                         },
                         Err(err) => {
@@ -303,6 +307,7 @@ where
                         },
                     }
                 }
+                report(reporter, "request-pull: no more response").await?;
             },
             Err(err) => {
                 report(
