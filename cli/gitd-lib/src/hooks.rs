@@ -119,7 +119,9 @@ where
         reporter: &mut P,
         urn: Urn,
     ) -> Result<(), error::Progress<E>> {
+        tracing::warn!("pre_upload: {}", &urn);
         if self.pre_upload.replicate {
+            report(reporter, "will replicate urn").await?;
             replicate(reporter, &self.client, &self.seeds, urn).await?;
         } else {
             report(

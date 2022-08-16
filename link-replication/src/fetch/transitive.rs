@@ -93,6 +93,7 @@ impl<T: AsRef<oid>> Negotiation for Transitive<T> {
         use either::Either::*;
         use refs::parsed::Identity;
 
+        println!("fetch/transitive.rs: ref_filter: {:?}", &r);
         let (name, tip) = refs::into_unpacked(r);
         let parsed = refs::parse::<Identity>(name.as_bstr()).ok()?;
         match parsed {

@@ -27,7 +27,14 @@ fn must_namespace(caps: &client::Capabilities) -> bool {
         Lazy::new(|| Version::new("2.31.0").unwrap());
 
     remote_git_version(caps)
-        .map(|version| version < *MIN_GIT_VERSION_NAMESPACES)
+        .map(|version| { 
+            println!("remote git version: {}", &version);
+            version < *MIN_GIT_VERSION_NAMESPACES} 
+        )
+        .or_else(|| {
+            println!("must_namespace: remote_git_version returns None");
+            None
+        })
         .unwrap_or(false)
 }
 
@@ -90,6 +97,8 @@ impl DelegateBlocking for LsRefs {
             arg.push_str(prefix);
             args.push(arg)
         }
+        println!("prepare_ls_refs: args are {:?}", &args);
+
         Ok(LsRefsAction::Continue)
     }
 
@@ -100,6 +109,7 @@ impl DelegateBlocking for LsRefs {
         _: &mut Vec<(&str, Option<&str>)>,
         refs: &[Ref],
     ) -> io::Result<Action> {
+        println!("prepare_fetch refs: {:?}", refs);
         self.out.extend_from_slice(refs);
         Ok(Action::Cancel)
     }
@@ -132,6 +142,7 @@ where
     R: AsyncRead + Unpin,
     W: AsyncWrite + Unpin,
 {
+    println!("ls.rs: ls_refs: opt: {:?}", &opt);
     let mut conn = transport::Stateless::new(opt.repo.clone(), recv, send);
     let mut delegate = LsRefs::new(opt);
     git_protocol::fetch(
@@ -144,5 +155,6 @@ where
     .await
     .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
 
+    println!("ls.rs: ls_refs: delegate.out: {:?}", &delegate.out);
     Ok(delegate.out)
 }

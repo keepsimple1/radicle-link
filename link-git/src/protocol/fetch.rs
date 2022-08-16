@@ -41,8 +41,13 @@ use super::{packwriter::PackWriter, remote_git_version, transport};
 fn must_namespace_want_ref(caps: &client::Capabilities) -> bool {
     static FIXED_AFTER: Lazy<Version> = Lazy::new(|| Version::new("2.33.0").unwrap());
 
+    println!("Checking namespace want_ref with caps: {:?}", caps);
     remote_git_version(caps)
         .map(|version| version <= *FIXED_AFTER)
+        .or_else(|| {
+            println!("remote_git_version is None");
+            None
+        })
         .unwrap_or(false)
 }
 
@@ -100,6 +105,7 @@ pub struct Fetch<P, O> {
 
 impl<P, O> Fetch<P, O> {
     pub fn new(opt: Options, pack_writer: P) -> Self {
+        assert!(false);
         Self {
             opt,
             pack_writer,
@@ -138,6 +144,7 @@ impl<P: PackWriter> DelegateBlocking for Fetch<P, P::Output> {
         _: &mut Vec<(&str, Option<&str>)>,
         _: &[Ref],
     ) -> io::Result<Action> {
+        assert!(false);
         if !self.opt.want_refs.is_empty() && !remote_supports_ref_in_want(caps) {
             return Err(io::Error::new(
                 io::ErrorKind::Unsupported,
@@ -194,6 +201,7 @@ impl<P: PackWriter> Delegate for Fetch<P, P::Output> {
         _: &[Ref],
         resp: &Response,
     ) -> io::Result<()> {
+        tracing::warn!("receive_pack: {}", &self.opt.repo);
         // Strip any namespaces leaked by the other end due to workarounds
         let namespace = format!("refs/namespaces/{}/", self.opt.repo);
         self.out.wanted_refs.extend(resp.wanted_refs().iter().map(

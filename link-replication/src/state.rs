@@ -79,6 +79,7 @@ where
                 .filter_map(|r| step.ref_filter(r))
                 .collect::<Vec<_>>(),
         };
+        println!("step refs: {:?}", &refs);
         Layout::pre_validate(step, &refs)?;
         match step.wants_haves(cx, &refs)? {
             Some((want, have)) => block_on(Net::run_fetch(cx, step.fetch_limit(), want, have))?,
@@ -109,6 +110,8 @@ where
                 }
             }
         }
+
+        println!("step: before prepare: {:?}", &refs);
 
         let mut up = UpdateTips::prepare(step, self, cx, &refs)?;
         self.trackings_mut().append(&mut up.track);

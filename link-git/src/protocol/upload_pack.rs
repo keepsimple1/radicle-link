@@ -71,6 +71,7 @@ where
     R: AsyncRead + Unpin,
     W: AsyncWrite + Unpin,
 {
+    tracing::warn!("upload_pack: {:?}", git_dir.as_ref());
     let mut recv = BufReader::new(recv);
     let header: Header = match recv.fill_buf().await?.get(0) {
         // legacy clients don't send a proper pktline header :(

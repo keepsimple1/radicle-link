@@ -8,7 +8,7 @@ use std::{sync::Arc, time::Duration};
 use async_lock::Semaphore;
 use link_async::{timeout, Spawner};
 use link_replication::io::UserInfo;
-use tracing::debug;
+// use tracing::debug;
 
 use crate::{
     git::{

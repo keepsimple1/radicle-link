@@ -28,6 +28,7 @@ where
 {
     pub fn new(repo: BString, recv: R, send: W) -> Self {
         let url = format!("rad://{}", repo);
+        println!("transport::Stateless::new url {}", &url);
         let inner = Connection::new(
             recv,
             send,
@@ -52,6 +53,7 @@ where
         write_mode: client::WriteMode,
         on_into_read: client::MessageKind,
     ) -> Result<client::RequestWriter<'_>, client::Error> {
+        println!("transport: write_mode {:?} on_into_read {:?}", &write_mode, &on_into_read);
         self.inner.request(write_mode, on_into_read)
     }
 

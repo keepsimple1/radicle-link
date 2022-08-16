@@ -102,6 +102,7 @@ where
             tail.push(head);
             tail
         };
+        tracing::warn!("run_fetch: wants: {:?}", &wants);
         let out = {
             // FIXME: make options work with slice
             let wants = wants.clone();

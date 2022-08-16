@@ -120,11 +120,11 @@ fn two_peers_and_a_seed() {
     let mut linkd = spawn_linkd(seed_home, &manifest_path);
 
     println!("\n== Start the peer 1 gitd ==\n");
-    let (is_parent, peer1_peer_id) = run_lnk(LnkCmd::ProfilePeer, peer1_home, passphrase);
-    if !is_parent {
-        return;
-    }
-    let mut lnk_gitd = spawn_lnk_gitd(peer1_home, &manifest_path, &peer1_peer_id);
+    // let (is_parent, peer1_peer_id) = run_lnk(LnkCmd::ProfilePeer, peer1_home, passphrase);
+    // if !is_parent {
+    //     return;
+    // }
+    // let mut lnk_gitd = spawn_lnk_gitd(peer1_home, &manifest_path, &peer1_peer_id);
 
     println!("\n== Make some changes in the repo ==\n");
     env::set_current_dir(&peer1_proj).unwrap();
@@ -155,10 +155,10 @@ fn two_peers_and_a_seed() {
 
     clean_up_known_hosts();
 
-    run_git_push();
+    // _run_git_push();
 
-    linkd.kill().ok();
-    lnk_gitd.kill().ok();
+    // linkd.kill().ok();
+    // lnk_gitd.kill().ok();
 }
 
 enum LnkCmd {
@@ -341,8 +341,7 @@ fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, peer_id: &str) -> Child {
         .arg("--push-seeds")
         .arg("--fetch-seeds")
         .arg("--linger-timeout")
-        .arg("10000")
-        .stdout(Stdio::from(log_file))
+        .arg("10000")        // .stdout(Stdio::from(log_file))
         .spawn()
         .expect("lnk-gitd failed to start");
     println!("lnk-gitd stdout redirected to {}", &log_name);
@@ -353,7 +352,7 @@ fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, peer_id: &str) -> Child {
 
 /// Returns true if this is the parent process,
 /// returns false if this is the child process.
-fn run_git_push() -> bool {
+fn _run_git_push() -> bool {
     let fork = Fork::from_ptmx().unwrap();
     if let Some(mut parent) = fork.is_parent().ok() {
         let yes = b"yes\n";

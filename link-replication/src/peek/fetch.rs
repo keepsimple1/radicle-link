@@ -74,6 +74,7 @@ impl Negotiation for ForFetch {
     fn ref_filter(&self, r: Ref) -> Option<FilteredRef<Self>> {
         use refs::parsed::Identity;
 
+        println!("peek/fetch.rs: ref_filter: {:?}", &r);
         let (name, tip) = refs::into_unpacked(r);
         let parsed = refs::parse::<Identity>(name.as_bstr()).ok()?;
         let remote_id = match &parsed.remote {

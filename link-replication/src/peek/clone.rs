@@ -46,6 +46,7 @@ impl Negotiation for ForClone {
         use either::Either::Left;
         use refs::parsed::Identity;
 
+        println!("peek/clone.rs: ref_filter: {:?}", &r);
         let (name, tip) = refs::into_unpacked(r);
         match refs::parse::<Identity>(name.as_ref()).ok()? {
             parsed @ refs::Parsed {

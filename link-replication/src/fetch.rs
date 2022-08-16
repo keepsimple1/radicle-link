@@ -59,6 +59,7 @@ impl<T: AsRef<oid>> Negotiation for Fetch<T> {
         use either::Either::*;
         use refs::parsed::Identity;
 
+        println!("fetch.rs: ref_filter: {:?}", &r);
         let (refname, tip) = refs::into_unpacked(r);
         let parsed = refs::parse::<Identity>(refname.as_bstr()).ok()?;
         match parsed {

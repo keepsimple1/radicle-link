@@ -134,11 +134,12 @@ where
     <C as Identities>::Urn: Clone + Debug + Ord,
     for<'a> &'a C: RefScan,
 {
-    info!("fetching initial verification refs");
+    println!("link-replication::clone: fetching initial verification refs");
     if LocalPeer::id(cx) == &remote_id {
         return Err("cannot replicate from self".into());
     }
     let mut state = FetchState::default();
+    println!("link-replication::clone: FetchState: step: peek::ForClone");
     state.step(
         cx,
         &peek::ForClone {
