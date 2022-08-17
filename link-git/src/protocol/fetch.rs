@@ -39,7 +39,7 @@ use super::{packwriter::PackWriter, remote_git_version, transport};
 // cf. https://lore.kernel.org/git/CD2XNXHACAXS.13J6JTWZPO1JA@schmidt/
 // Fixed in `git.git` 1ab13eb, which should land in 2.34
 fn must_namespace_want_ref(caps: &client::Capabilities) -> bool {
-    static FIXED_AFTER: Lazy<Version> = Lazy::new(|| Version::new("2.33.0").unwrap());
+    static FIXED_AFTER: Lazy<Version> = Lazy::new(|| Version::new("2.25.0").unwrap());
 
     println!("Checking namespace want_ref with caps: {:?}", caps);
     remote_git_version(caps)
@@ -105,7 +105,7 @@ pub struct Fetch<P, O> {
 
 impl<P, O> Fetch<P, O> {
     pub fn new(opt: Options, pack_writer: P) -> Self {
-        assert!(false);
+        // assert!(false);
         Self {
             opt,
             pack_writer,
@@ -144,7 +144,6 @@ impl<P: PackWriter> DelegateBlocking for Fetch<P, P::Output> {
         _: &mut Vec<(&str, Option<&str>)>,
         _: &[Ref],
     ) -> io::Result<Action> {
-        assert!(false);
         if !self.opt.want_refs.is_empty() && !remote_supports_ref_in_want(caps) {
             return Err(io::Error::new(
                 io::ErrorKind::Unsupported,
@@ -160,7 +159,7 @@ impl<P: PackWriter> DelegateBlocking for Fetch<P, P::Output> {
         }
 
         self.need_namespaced_want_ref = must_namespace_want_ref(caps);
-
+        println!("\n need_namespaced_want_ref: {} \n", self.need_namespaced_want_ref);
         Ok(Action::Continue)
     }
 

@@ -24,7 +24,7 @@ use super::{remote_git_version, transport};
 // cf. https://lore.kernel.org/git/pMV5dJabxOBTD8kJBaPuWK0aS6OJhRQ7YFGwfhPCeSJEbPDrIFBza36nXBCgUCeUJWGmpjPI1rlOGvZJEh71Ruz4SqljndUwOCoBUDRHRDU=@eagain.st/
 fn must_namespace(caps: &client::Capabilities) -> bool {
     static MIN_GIT_VERSION_NAMESPACES: Lazy<Version> =
-        Lazy::new(|| Version::new("2.31.0").unwrap());
+        Lazy::new(|| Version::new("2.25.0").unwrap());
 
     remote_git_version(caps)
         .map(|version| { 
