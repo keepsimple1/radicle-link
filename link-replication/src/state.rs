@@ -79,11 +79,13 @@ where
                 .filter_map(|r| step.ref_filter(r))
                 .collect::<Vec<_>>(),
         };
-        println!("step refs: {:?}", &refs);
+        println!("link-replication::state::FetchState::step refs: {:?}", &refs);
         Layout::pre_validate(step, &refs)?;
         match step.wants_haves(cx, &refs)? {
             Some((want, have)) => block_on(Net::run_fetch(cx, step.fetch_limit(), want, have))?,
-            None => info!("nothing to fetch"),
+            None => {
+                println!("link-replication::state::FetchState::step nothing to fetch"); 
+                info!("nothing to fetch"); }
         };
 
         for r in &refs {
@@ -111,7 +113,7 @@ where
             }
         }
 
-        println!("step: before prepare: {:?}", &refs);
+        println!("link-replication::state::FetchState::step: before prepare: {:?}", &refs);
 
         let mut up = UpdateTips::prepare(step, self, cx, &refs)?;
         self.trackings_mut().append(&mut up.track);
