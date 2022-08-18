@@ -174,6 +174,9 @@ where
 {
     let mut bld = BuildWantsHaves::default();
 
+    println!("link-replication::fetch.rs wants_haves: signed_refs {:?} filtered_refs: {:?}", 
+    &signed_refs, filtered_refs);
+
     for (remote_id, refs) in signed_refs.into_iter() {
         for (name, tip) in refs {
             // TODO: ensure sigrefs are well-formed. Or else, prune `refs`
