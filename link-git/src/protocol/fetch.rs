@@ -41,7 +41,7 @@ use super::{packwriter::PackWriter, remote_git_version, transport};
 fn must_namespace_want_ref(caps: &client::Capabilities) -> bool {
     static FIXED_AFTER: Lazy<Version> = Lazy::new(|| Version::new("2.25.0").unwrap());
 
-    println!("Checking namespace want_ref with caps: {:?}", caps);
+    println!("link-git::protocol::fetch.rs checking namespace want_ref with caps: {:?}", caps);
     remote_git_version(caps)
         .map(|version| version <= *FIXED_AFTER)
         .or_else(|| {

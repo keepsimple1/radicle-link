@@ -84,7 +84,7 @@ where
         match step.wants_haves(cx, &refs)? {
             Some((want, have)) => block_on(Net::run_fetch(cx, step.fetch_limit(), want, have))?,
             None => {
-                println!("link-replication::state::FetchState::step nothing to fetch"); 
+                println!("\nlink-replication::state::FetchState::step nothing to fetch\n");
                 info!("nothing to fetch"); }
         };
 
@@ -113,7 +113,7 @@ where
             }
         }
 
-        println!("link-replication::state::FetchState::step: before prepare: {:?}", &refs);
+        println!("link-replication::state::FetchState::step: before UpdateTips::prepare: {:?}", &refs);
 
         let mut up = UpdateTips::prepare(step, self, cx, &refs)?;
         self.trackings_mut().append(&mut up.track);
