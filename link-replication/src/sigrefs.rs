@@ -158,6 +158,7 @@ where
     S: SignedRefs,
 {
     let must = must.iter().map(|id| {
+        println!("link-replication:sigrefs::combined: must id {} cutoff {}", id, cutoff);
         SignedRefs::load(s, id, cutoff)
             .map_err(error::Combine::from)
             .and_then(|sr| match sr {

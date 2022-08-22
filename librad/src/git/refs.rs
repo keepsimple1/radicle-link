@@ -671,6 +671,7 @@ where
     S: AsRef<storage::ReadOnly>,
 {
     let sigrefs = Reference::rad_signed_refs(Namespace::from(urn), peer.copied());
+    println!("libard::git::refs::load {:?}", &sigrefs);
     let tip = storage
         .as_ref()
         .reference_oid(&sigrefs)

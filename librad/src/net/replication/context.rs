@@ -365,6 +365,7 @@ impl SignedRefs for Context<'_> {
     type Error = error::Sigrefs;
 
     fn load(&self, of: &PeerId, cutoff: usize) -> Result<Option<Sigrefs<Self::Oid>>, Self::Error> {
+        println!("librad::net::replication::context: load: of {} cutoff {}", of, cutoff);
         match git::refs::load(&self.store, &self.urn, Some(of))? {
             None => Ok(None),
             Some(git::refs::Loaded { at, refs: signed }) => {
@@ -392,6 +393,8 @@ impl SignedRefs for Context<'_> {
         signed_by: &PeerId,
         cutoff: usize,
     ) -> Result<Option<Sigrefs<Self::Oid>>, Self::Error> {
+        println!("librad::net::replication::context: load_at: signed_by {} cutoff {}", signed_by, cutoff);
+
         match git::refs::load_at(&self.store, treeish.into().into(), Some(signed_by))? {
             None => Ok(None),
             Some(git::refs::Loaded { at, refs: signed }) => {
