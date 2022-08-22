@@ -94,6 +94,8 @@ where
         }))
         .collect::<Result<_, _>>()?;
 
+    println!("link-replication::eval::pull tracked: {:?}", &tracked);
+
     info!("fetching verification refs");
     let peek = peek::ForFetch {
         local_id,
@@ -118,6 +120,7 @@ where
             cutoff: 2,
         },
     )?;
+    println!("link-replication::eval::pull signed_refs: {:?}", &signed_refs);
     debug!(?signed_refs);
 
     let mut transitive: BTreeMap<PeerId, DataPolicy> = BTreeMap::new();
