@@ -59,6 +59,7 @@ where
 {
     use either::Either::*;
 
+    println!("link-replication::eval::pull");
     let scx = state.as_shim(cx);
     let local_id = *LocalPeer::id(&scx);
     let delegates = VerifiedIdentity::delegate_ids(&anchor);
@@ -210,6 +211,7 @@ where
         signed_refs,
         limit: limit.data,
     };
+    println!("link-replication::eval::pull fetching data: {:?}", &fetch);
     info!("fetching data");
     debug!(?fetch);
     state.step(cx, &fetch)?;
