@@ -245,6 +245,7 @@ where
 
     fn load(&self, of: &PeerId, cutoff: usize) -> Result<Option<Sigrefs<Self::Oid>>, Self::Error> {
         if self.fetch.sigs.is_empty() {
+            println!("link-replication::state::SignedRefs::load fetch sigs is empty of:{} cutoff:{}", of, cutoff);
             SignedRefs::load(self.inner, of, cutoff)
         } else {
             match self.fetch.sigref_tips().get(of) {
@@ -260,6 +261,7 @@ where
         of: &PeerId,
         cutoff: usize,
     ) -> Result<Option<Sigrefs<Self::Oid>>, Self::Error> {
+        println!("link-replication::state::SignedRefs::load_at of:{} cutoff:{}", of, cutoff);
         self.inner.load_at(treeish, of, cutoff)
     }
 
