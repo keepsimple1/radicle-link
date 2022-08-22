@@ -697,6 +697,7 @@ pub(crate) fn load_at<S>(
 where
     S: AsRef<storage::ReadOnly>,
 {
+    println!("libard::git::refs::load_at oid {}", &at);
     let signer = peer.unwrap_or_else(|| storage.as_ref().peer_id());
     let loaded = storage
         .as_ref()

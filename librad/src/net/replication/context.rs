@@ -408,6 +408,7 @@ impl SignedRefs for Context<'_> {
                     })
                     .collect::<HashMap<_, _>>();
                 let mut remotes = git::refs::Refs::from(signed).remotes;
+                println!("librad::net::replication::context: load_at: remotes: {:?}", &remotes);
                 remotes.cutoff_mut(cutoff);
                 let remotes = remotes.flatten().copied().collect();
 
