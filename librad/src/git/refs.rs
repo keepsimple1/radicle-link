@@ -337,6 +337,7 @@ impl Refs {
     #[tracing::instrument(skip(storage, urn), fields(urn = %urn, local_peer = %storage.peer_id()))]
     pub fn update(storage: &Storage, urn: &Urn) -> Result<Updated, stored::Error> {
         let branch = Reference::rad_signed_refs(Namespace::from(urn), None);
+        println!("updating signed refs for {}", branch);
         tracing::debug!("updating signed refs for {}", branch);
 
         let signed_refs = Self::compute(storage, urn)?.sign(storage.signer())?;
