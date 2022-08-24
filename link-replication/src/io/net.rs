@@ -102,7 +102,7 @@ where
             tail.push(head);
             tail
         };
-        println!("link-replication::io::net::run_fetch {:?}", &wants);
+        println!("link-replication::io::net::run_fetch wants {:?}", &wants);
         tracing::warn!("run_fetch: wants: {:?}", &wants);
         let out = {
             // FIXME: make options work with slice

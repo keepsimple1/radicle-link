@@ -398,6 +398,8 @@ impl SignedRefs for Context<'_> {
         match git::refs::load_at(&self.store, treeish.into().into(), Some(signed_by))? {
             None => Ok(None),
             Some(git::refs::Loaded { at, refs: signed }) => {
+                let json = serde_json::to_string(&signed).unwrap();
+                println!("librad::net::replication::context:load_at signed: {:?}", &json);
                 let refs = signed
                     .iter_categorised()
                     .map(|((name, oid), cat)| {
