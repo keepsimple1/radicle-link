@@ -72,7 +72,7 @@ impl<'a> From<Namespaced<'a, request_pull::Success>> for Progress {
 
         let prefix = ns.prefix();
         if !ns.payload.refs.is_empty() {
-            progress.push_str("updated references:\n");
+            progress.push_str("updated references: payload refs\n");
             for updated in &ns.payload.refs {
                 let name = updated.name.strip_prefix(&prefix).unwrap_or(&updated.name);
                 let target = updated.oid;
@@ -104,7 +104,7 @@ impl<'a> From<Namespaced<'a, replication::Success>> for Progress {
 
         let updates = s.updated_refs();
         if !updates.is_empty() {
-            progress.push_str("updated references:\n");
+            progress.push_str("updated references (after call updated_refs):\n");
             for updated in updates {
                 let update = match updated {
                     Updated::Direct { name, target } => {
