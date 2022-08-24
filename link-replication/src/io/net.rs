@@ -118,6 +118,7 @@ where
                     want_refs: vec![],
                 },
                 move |stop| {
+                    println!("link-replication::io::net create packwriter: git_dir {:?}", &self.git_dir);
                     git::packwriter::Standard::new(
                         &self.git_dir,
                         git::packwriter::Options {
@@ -144,6 +145,7 @@ where
             .index_path
             .expect("written packfile must have a path");
 
+        println!("pack_path {:?}", &pack_path);
         // Validate we got all requested tips in the pack
         {
             use link_git::odb::index::IndexFile;

@@ -243,6 +243,8 @@ impl<F: BuildThickener> PackWriter for Standard<F> {
             .thick
             .build_thickener()
             .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+
+        println!("link-git::protocol::packwriter: git_dir {:?}", &self.git_dir);
         Bundle::write_to_directory(
             BlockOn::new(TryTake::new(pack, self.opt.max_pack_bytes)),
             Some(self.git_dir.join("objects").join("pack")),
