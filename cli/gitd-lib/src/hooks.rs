@@ -78,6 +78,14 @@ where
         P: ProgressReporter<Error = E>,
     {
         tracing::warn!("post_receive: request_pull: {}", self.post_receive.request_pull);
+
+        let at = update_signed_refs(
+            reporter,
+            self.spawner.clone(),
+            self.pool.clone(),
+            urn.clone(),
+        )
+        .await?;
         if self.post_receive.request_pull {
             tracing::info!("executing request-pull");
             request_pull(reporter, &self.client, &self.seeds, urn.clone()).await?;
@@ -88,16 +96,20 @@ where
             )
             .await?;
         }
-        let at = match update_signed_refs(
-            reporter,
-            self.spawner.clone(),
-            self.pool.clone(),
-            urn.clone(),
-        )
-        .await?
-        {
+        // let at = match update_signed_refs(
+        //     reporter,
+        //     self.spawner.clone(),
+        //     self.pool.clone(),
+        //     urn.clone(),
+        // )
+        // .await?
+        // {
+        //     Some(at) => at,
+        //     None => return Ok(()),
+        // };
+        let at = match at {
             Some(at) => at,
-            None => return Ok(()),
+            None => return Ok(())
         };
         if let Some(ann) = &self.post_receive.announce {
             announce(reporter, ann, urn, at).await?;
