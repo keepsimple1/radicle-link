@@ -96,17 +96,6 @@ where
             )
             .await?;
         }
-        // let at = match update_signed_refs(
-        //     reporter,
-        //     self.spawner.clone(),
-        //     self.pool.clone(),
-        //     urn.clone(),
-        // )
-        // .await?
-        // {
-        //     Some(at) => at,
-        //     None => return Ok(()),
-        // };
         let at = match at {
             Some(at) => at,
             None => return Ok(())
