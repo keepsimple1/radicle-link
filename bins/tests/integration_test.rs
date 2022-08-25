@@ -94,8 +94,9 @@ fn two_peers_and_a_seed() {
 
     println!("\n== Start the peer 1 gitd ==\n");
     let cmd = LnkCmd::ProfilePeer;
+    let gitd_addr = "127.0.0.1:9987";
     let peer1_peer_id = run_lnk!(&cmd, peer1_home, passphrase);
-    spawn_lnk_gitd(peer1_home, &manifest_path, &peer1_peer_id);
+    let mut gitd = spawn_lnk_gitd(peer1_home, &manifest_path, gitd_addr);
 
     println!("\n== Make some changes in the repo ==\n");
     env::set_current_dir(&peer1_proj).unwrap();
@@ -115,7 +116,7 @@ fn two_peers_and_a_seed() {
     println!("git-commit: {:?}", &output);
 
     println!("\n== Add the linkd remote to the repo ==\n");
-    let remote_url = format!("ssh://rad@127.0.0.1:9987/{}.git", &proj_urn);
+    let remote_url = format!("ssh://rad@{}/{}.git", gitd_addr, &proj_urn);
     Command::new("git")
         .arg("remote")
         .arg("add")
@@ -132,10 +133,6 @@ fn two_peers_and_a_seed() {
     }
 
     let peer1_last_commit = git_last_commit();
-    println!(
-        "\n== peer1 project last commit: {} ==\n",
-        &peer1_last_commit
-    );
 
     println!("\n== Clone to peer2 ==\n");
 
@@ -152,9 +149,10 @@ fn two_peers_and_a_seed() {
     println!("\n== peer1 proj last commit: {}", &peer1_last_commit);
     println!("\n== peer2 proj last commit: {}", &peer2_last_commit);
 
-    println!("\n== Cleanup: kill linkd (seed) ==\n");
+    println!("\n== Cleanup: kill linkd (seed) and gitd (peer1) ==\n");
 
     linkd.kill().ok();
+    gitd.kill().ok();
 
     assert_eq!(peer1_last_commit, peer2_last_commit);
 }
@@ -321,10 +319,7 @@ fn spawn_linkd(lnk_home: &str, manifest_path: &str) -> Child {
     child
 }
 
-fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, peer_id: &str) {
-    let port = "9987";
-    let xdg_runtime_dir = env!("XDG_RUNTIME_DIR");
-    let rpc_socket = format!("{}/link-peer-{}-rpc.socket", xdg_runtime_dir, peer_id);
+fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, addr: &str) -> Child {
     let target_dir = bins_target_dir();
     let exec_path = format!("{}/debug/lnk-gitd", &target_dir);
 
@@ -340,25 +335,16 @@ fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, peer_id: &str) {
         .output()
         .expect("cargo build lnk-gitd failed");
 
-    Command::new("systemd-socket-activate")
-        .arg("-l")
-        .arg(port)
-        .arg("--fdname=ssh")
-        .arg("-E")
-        .arg("SSH_AUTH_SOCK")
-        .arg("-E")
-        .arg("RUST_BACKTRACE")
-        .arg(&exec_path)
+    let child = Command::new(&exec_path)
         .arg(lnk_home)
-        .arg("--linkd-rpc-socket")
-        .arg(rpc_socket)
         .arg("--push-seeds")
         .arg("--fetch-seeds")
-        .arg("--linger-timeout")
-        .arg("10000")
+        .arg("-a")
+        .arg(addr)
         .spawn()
         .expect("lnk-gitd failed to start");
     println!("started lnk-gitd");
+    child
 }
 
 /// Returns true if this is the parent process,
