@@ -170,11 +170,15 @@ fn two_peers_and_a_seed() {
         return;
     }
 
+    let peer1_last_commit = git_last_commit();
+    println!("\n== peer1 project last commit: {} ==\n", &peer1_last_commit);
+
     println!("\n== Clone to peer2 ==\n");
 
     env::set_current_dir("..").unwrap(); // out of the peer1 proj directory.
+    let peer2_proj = format!("peer2_proj_{}", timestamp());
     let (is_parent, _) = run_lnk(
-        LnkCmd::Clone(proj_urn, peer1_peer_id),
+        LnkCmd::Clone(proj_urn, peer1_peer_id, peer2_proj.clone()),
         peer2_home,
         passphrase,
     );
@@ -182,9 +186,16 @@ fn two_peers_and_a_seed() {
         return;
     }
 
-    println!("\n== Kill linkd (seed) ==\n");
+    env::set_current_dir(peer2_proj).unwrap();
+    let peer2_last_commit = git_last_commit();
+    println!("\n== peer1 proj last commit: {}", &peer1_last_commit);
+    println!("\n== peer2 proj last commit: {}", &peer2_last_commit);
+
+    println!("\n== Cleanup: kill linkd (seed) ==\n");
 
     linkd.kill().ok();
+
+    assert_eq!(peer1_last_commit, peer2_last_commit);
 }
 
 enum LnkCmd {
@@ -195,7 +206,7 @@ enum LnkCmd {
     IdPersonCreate(String),  // the associated string is "the person's name".
     IdLocalSet(String),      // the associated string is "urn".
     IdProjectCreate(String), // the associated string is "the project name".
-    Clone(String, String),   // the associated string is "urn", "peer_id"
+    Clone(String, String, String),   // the associated string is "urn", "peer_id", "path"
 }
 
 /// Runs a `cmd` for `lnk_home`. Rebuilds `lnk` if necessary.
@@ -238,7 +249,7 @@ fn run_lnk(cmd: LnkCmd, lnk_home: &str, passphrase: &[u8]) -> (bool, String) {
                 LnkCmd::ProfilePeer => {
                     output = line; // get the last line for peer id.
                 },
-                LnkCmd::Clone(ref _urn, ref _peer) => {
+                LnkCmd::Clone(ref _urn, ref _peer, ref _path) => {
                     output = line;
                 },
                 _ => {},
@@ -296,8 +307,7 @@ fn run_lnk(cmd: LnkCmd, lnk_home: &str, passphrase: &[u8]) -> (bool, String) {
                     .arg("--payload")
                     .arg(payload.to_string())
             },
-            LnkCmd::Clone(urn, peer_id) => {
-                let peer2_proj = format!("peer2_proj_{}", timestamp());
+            LnkCmd::Clone(urn, peer_id, peer2_proj) => {
                 lnk_cmd
                     .arg("clone")
                     .arg("--urn")
@@ -412,6 +422,15 @@ fn run_git_push() -> bool {
             .expect("failed to do git push");
         false
     }
+}
+
+fn git_last_commit() -> String {
+    let output = Command::new("git")
+        .arg("rev-parse")
+        .arg("HEAD")
+        .output()
+        .expect("failed to run git rev-parse");
+    String::from_utf8_lossy(&output.stdout).to_string()
 }
 
 /// Returns UNIX_TIME in millis.
