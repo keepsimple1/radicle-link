@@ -35,92 +35,55 @@ fn two_peers_and_a_seed() {
     let passphrase = b"play\n";
 
     println!("\n== create lnk homes for two peers and one seed ==\n");
-    let (is_parent, _) = run_lnk(LnkCmd::ProfileCreate, peer1_home, passphrase);
-    if !is_parent {
-        return;
-    }
-    let (is_parent, _) = run_lnk(LnkCmd::ProfileCreate, peer2_home, passphrase);
-    if !is_parent {
-        return;
-    }
-    let (is_parent, _) = run_lnk(LnkCmd::ProfileCreate, seed_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::ProfileCreate;
+    run_lnk!(&cmd, peer1_home, passphrase);
+    run_lnk!(&cmd, peer2_home, passphrase);
+    run_lnk!(&cmd, seed_home, passphrase);
 
     println!("\n== add ssh keys for each profile to the ssh-agent ==\n");
-    let (is_parent, _) = run_lnk(LnkCmd::ProfileSshAdd, peer1_home, passphrase);
-    if !is_parent {
-        return;
-    }
-    let (is_parent, _) = run_lnk(LnkCmd::ProfileSshAdd, peer2_home, passphrase);
-    if !is_parent {
-        return;
-    }
-    let (is_parent, _) = run_lnk(LnkCmd::ProfileSshAdd, seed_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::ProfileSshAdd;
+    run_lnk!(&cmd, peer1_home, passphrase);
+    run_lnk!(&cmd, peer2_home, passphrase);
+    run_lnk!(&cmd, seed_home, passphrase);
 
     println!("\n== Creating local link 1 identity ==\n");
     let peer1_name = "sockpuppet1".to_string();
-    let (is_parent, output) = run_lnk(LnkCmd::IdPersonCreate(peer1_name), peer1_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::IdPersonCreate(peer1_name);
+    let output = run_lnk!(&cmd, peer1_home, passphrase);
     let v: Value = serde_json::from_str(&output).unwrap();
     let urn1 = v["urn"].as_str().unwrap().to_string();
-    let (is_parent, _) = run_lnk(LnkCmd::IdLocalSet(urn1), peer1_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::IdLocalSet(urn1);
+    run_lnk!(&cmd, peer1_home, passphrase);
 
     println!("\n== Creating local link 2 identity ==\n");
     let peer2_name = "sockpuppet2".to_string();
-    let (is_parent, output) = run_lnk(LnkCmd::IdPersonCreate(peer2_name), peer2_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::IdPersonCreate(peer2_name);
+    let output = run_lnk!(&cmd, peer2_home, passphrase);
     let v: Value = serde_json::from_str(&output).unwrap();
     let urn2 = v["urn"].as_str().unwrap().to_string();
-    let (is_parent, _) = run_lnk(LnkCmd::IdLocalSet(urn2), peer2_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::IdLocalSet(urn2);
+    run_lnk!(&cmd, peer2_home, passphrase);
 
     println!("\n== Create a local repository ==\n");
     let peer1_proj = format!("peer1_proj_{}", timestamp());
-    let (is_parent, output) = run_lnk(
-        LnkCmd::IdProjectCreate(peer1_proj.clone()),
-        peer1_home,
-        passphrase,
-    );
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::IdProjectCreate(peer1_proj.clone());
+    let output = run_lnk!(&cmd, peer1_home, passphrase);
     let v: Value = serde_json::from_str(&output).unwrap();
     let proj_urn = v["urn"].as_str().unwrap().to_string();
     println!("our project URN: {}", &proj_urn);
 
     println!("\n== Add the seed to the local peer seed configs ==\n");
-    let (is_parent, seed_peer_id) = run_lnk(LnkCmd::ProfilePeer, seed_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::ProfilePeer;
+    let seed_peer_id = run_lnk!(&cmd, seed_home, passphrase);
     let seed_endpoint = format!("{}@127.0.0.1:8799", &seed_peer_id);
 
-    let (is_parent, peer1_profile) = run_lnk(LnkCmd::ProfileGet, peer1_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::ProfileGet;
+    let peer1_profile = run_lnk!(&cmd, peer1_home, passphrase);
     let peer1_seed = format!("{}/{}/seeds", peer1_home, peer1_profile);
     let mut peer1_f = File::create(peer1_seed).unwrap();
     peer1_f.write_all(seed_endpoint.as_bytes()).unwrap();
 
-    let (is_parent, peer2_profile) = run_lnk(LnkCmd::ProfileGet, peer2_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let peer2_profile = run_lnk!(&cmd, peer2_home, passphrase);
     let peer2_seed = format!("{}/{}/seeds", peer2_home, peer2_profile);
     let mut peer2_f = File::create(peer2_seed).unwrap();
     peer2_f.write_all(seed_endpoint.as_bytes()).unwrap();
@@ -130,10 +93,8 @@ fn two_peers_and_a_seed() {
     let mut linkd = spawn_linkd(seed_home, &manifest_path);
 
     println!("\n== Start the peer 1 gitd ==\n");
-    let (is_parent, peer1_peer_id) = run_lnk(LnkCmd::ProfilePeer, peer1_home, passphrase);
-    if !is_parent {
-        return;
-    }
+    let cmd = LnkCmd::ProfilePeer;
+    let peer1_peer_id = run_lnk!(&cmd, peer1_home, passphrase);
     spawn_lnk_gitd(peer1_home, &manifest_path, &peer1_peer_id);
 
     println!("\n== Make some changes in the repo ==\n");
@@ -171,17 +132,17 @@ fn two_peers_and_a_seed() {
     }
 
     let peer1_last_commit = git_last_commit();
-    println!("\n== peer1 project last commit: {} ==\n", &peer1_last_commit);
+    println!(
+        "\n== peer1 project last commit: {} ==\n",
+        &peer1_last_commit
+    );
 
     println!("\n== Clone to peer2 ==\n");
 
     env::set_current_dir("..").unwrap(); // out of the peer1 proj directory.
     let peer2_proj = format!("peer2_proj_{}", timestamp());
-    let (is_parent, _) = run_lnk(
-        LnkCmd::Clone(proj_urn, peer1_peer_id, peer2_proj.clone()),
-        peer2_home,
-        passphrase,
-    );
+    let cmd = LnkCmd::Clone(proj_urn, peer1_peer_id, peer2_proj.clone());
+    run_lnk!(&cmd, peer2_home, passphrase);
     if !is_parent {
         return;
     }
@@ -206,122 +167,125 @@ enum LnkCmd {
     IdPersonCreate(String),  // the associated string is "the person's name".
     IdLocalSet(String),      // the associated string is "urn".
     IdProjectCreate(String), // the associated string is "the project name".
-    Clone(String, String, String),   // the associated string is "urn", "peer_id", "path"
+    Clone(String, String, String), // the associated string is "urn", "peer_id", "path"
 }
 
-/// Runs a `cmd` for `lnk_home`. Rebuilds `lnk` if necessary.
-/// Return.0: true if this is the parent (i.e. test) process,
-///           false if this is the child (i.e. lnk) process.
-/// Return.1: an output that depends on the `cmd`.
-fn run_lnk(cmd: LnkCmd, lnk_home: &str, passphrase: &[u8]) -> (bool, String) {
-    let fork = Fork::from_ptmx().unwrap();
-    if let Some(mut parent) = fork.is_parent().ok() {
-        // Input the passphrase if necessary.
-        match cmd {
-            LnkCmd::ProfileCreate | LnkCmd::ProfileSshAdd => {
-                parent.write_all(passphrase).unwrap();
-                println!("{}: wrote passphase", lnk_home);
-            },
-            _ => {},
-        }
-
-        // Print the output and decode them if necessary.
-        let buf_reader = BufReader::new(parent);
-        let mut output = String::new();
-        for line in buf_reader.lines() {
-            let line = line.unwrap();
-            println!("{}: {}", lnk_home, line);
-
-            match cmd {
-                LnkCmd::IdPersonCreate(ref _name) => {
-                    if line.find("\"urn\":").is_some() {
-                        output = line; // get the line with URN.
-                    }
-                },
-                LnkCmd::IdProjectCreate(ref _name) => {
-                    if line.find("\"urn\":").is_some() {
-                        output = line; // get the line with URN.
-                    }
-                },
-                LnkCmd::ProfileGet => {
-                    output = line; // get the last line for profile id.
-                },
-                LnkCmd::ProfilePeer => {
-                    output = line; // get the last line for peer id.
-                },
-                LnkCmd::Clone(ref _urn, ref _peer, ref _path) => {
-                    output = line;
+/// Runs a `lnk` command of `$cmd` using `$lnk_home` as the node home.
+/// Also support the passphrase input for commands that need it.
+#[macro_export]
+macro_rules! run_lnk {
+    ( $cmd:expr, $lnk_home:ident, $passphrase:ident ) => {{
+        let fork = Fork::from_ptmx().unwrap();
+        if let Some(mut parent) = fork.is_parent().ok() {
+            match $cmd {
+                LnkCmd::ProfileCreate | LnkCmd::ProfileSshAdd => {
+                    // Input the passphrase if necessary.
+                    parent.write_all($passphrase).unwrap();
                 },
                 _ => {},
             }
+            process_lnk_output($lnk_home, &mut parent, $cmd)
+        } else {
+            start_lnk_cmd($lnk_home, $cmd);
+            return;
         }
+    }};
+}
 
-        (true, output)
-    } else {
-        // Child process is to run `lnk`.
-        let manifest_path = manifest_path();
+fn process_lnk_output(lnk_home: &str, lnk_process: &mut Master, cmd: &LnkCmd) -> String {
+    let buf_reader = BufReader::new(lnk_process);
+    let mut output = String::new();
+    for line in buf_reader.lines() {
+        let line = line.unwrap();
 
-        // cargo run \
-        // --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
-        // -p lnk -- "$@"
-        let mut lnk_cmd = Command::new("cargo");
-        lnk_cmd
-            .env("LNK_HOME", lnk_home)
-            .arg("run")
-            .arg("--manifest-path")
-            .arg(manifest_path)
-            .arg("-p")
-            .arg("lnk")
-            .arg("--");
-        let full_cmd = match cmd {
-            LnkCmd::ProfileCreate => lnk_cmd.arg("profile").arg("create"),
-            LnkCmd::ProfileGet => lnk_cmd.arg("profile").arg("get"),
-            LnkCmd::ProfilePeer => lnk_cmd.arg("profile").arg("peer"),
-            LnkCmd::ProfileSshAdd => lnk_cmd.arg("profile").arg("ssh").arg("add"),
-            LnkCmd::IdPersonCreate(name) => {
-                let payload = json!({ "name": name });
-                lnk_cmd
-                    .arg("identities")
-                    .arg("person")
-                    .arg("create")
-                    .arg("new")
-                    .arg("--payload")
-                    .arg(payload.to_string())
+        // Print the output and decode them if necessary.
+        println!("{}: {}", lnk_home, line);
+        match cmd {
+            LnkCmd::IdPersonCreate(ref _name) => {
+                if line.find("\"urn\":").is_some() {
+                    output = line; // get the line with URN.
+                }
             },
-            LnkCmd::IdLocalSet(urn) => lnk_cmd
-                .arg("identities")
-                .arg("local")
-                .arg("set")
-                .arg("--urn")
-                .arg(urn),
-            LnkCmd::IdProjectCreate(name) => {
-                let payload = json!({"name": name, "default_branch": "master"});
-                let project_path = format!("./{}", name);
-                lnk_cmd
-                    .arg("identities")
-                    .arg("project")
-                    .arg("create")
-                    .arg("new")
-                    .arg("--path")
-                    .arg(project_path)
-                    .arg("--payload")
-                    .arg(payload.to_string())
+            LnkCmd::IdProjectCreate(ref _name) => {
+                if line.find("\"urn\":").is_some() {
+                    output = line; // get the line with URN.
+                }
             },
-            LnkCmd::Clone(urn, peer_id, peer2_proj) => {
-                lnk_cmd
-                    .arg("clone")
-                    .arg("--urn")
-                    .arg(urn)
-                    .arg("--path")
-                    .arg(peer2_proj)
-                    .arg("--peer")
-                    .arg(peer_id)
+            LnkCmd::ProfileGet => {
+                output = line; // get the last line for profile id.
             },
-        };
-        full_cmd.status().expect("lnk cmd failed:");
-
-        (false, String::new())
+            LnkCmd::ProfilePeer => {
+                output = line; // get the last line for peer id.
+            },
+            LnkCmd::Clone(ref _urn, ref _peer, ref _path) => {
+                output = line;
+            },
+            _ => {},
+        }
     }
+
+    output
+}
+
+fn start_lnk_cmd(lnk_home: &str, cmd: &LnkCmd) {
+    let manifest_path = manifest_path();
+
+    // cargo run \
+    // --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
+    // -p lnk -- "$@"
+    let mut lnk_cmd = Command::new("cargo");
+    lnk_cmd
+        .env("LNK_HOME", lnk_home)
+        .arg("run")
+        .arg("--manifest-path")
+        .arg(manifest_path)
+        .arg("-p")
+        .arg("lnk")
+        .arg("--");
+    let full_cmd = match cmd {
+        LnkCmd::ProfileCreate => lnk_cmd.arg("profile").arg("create"),
+        LnkCmd::ProfileGet => lnk_cmd.arg("profile").arg("get"),
+        LnkCmd::ProfilePeer => lnk_cmd.arg("profile").arg("peer"),
+        LnkCmd::ProfileSshAdd => lnk_cmd.arg("profile").arg("ssh").arg("add"),
+        LnkCmd::IdPersonCreate(name) => {
+            let payload = json!({ "name": name });
+            lnk_cmd
+                .arg("identities")
+                .arg("person")
+                .arg("create")
+                .arg("new")
+                .arg("--payload")
+                .arg(payload.to_string())
+        },
+        LnkCmd::IdLocalSet(urn) => lnk_cmd
+            .arg("identities")
+            .arg("local")
+            .arg("set")
+            .arg("--urn")
+            .arg(urn),
+        LnkCmd::IdProjectCreate(name) => {
+            let payload = json!({"name": name, "default_branch": "master"});
+            let project_path = format!("./{}", name);
+            lnk_cmd
+                .arg("identities")
+                .arg("project")
+                .arg("create")
+                .arg("new")
+                .arg("--path")
+                .arg(project_path)
+                .arg("--payload")
+                .arg(payload.to_string())
+        },
+        LnkCmd::Clone(urn, peer_id, peer2_proj) => lnk_cmd
+            .arg("clone")
+            .arg("--urn")
+            .arg(urn)
+            .arg("--path")
+            .arg(peer2_proj)
+            .arg("--peer")
+            .arg(peer_id),
+    };
+    full_cmd.status().expect("lnk cmd failed:");
 }
 
 fn spawn_linkd(lnk_home: &str, manifest_path: &str) -> Child {
@@ -376,26 +340,25 @@ fn spawn_lnk_gitd(lnk_home: &str, manifest_path: &str, peer_id: &str) {
         .output()
         .expect("cargo build lnk-gitd failed");
 
-        Command::new("systemd-socket-activate")
-            .arg("-l")
-            .arg(port)
-            .arg("--fdname=ssh")
-            .arg("-E")
-            .arg("SSH_AUTH_SOCK")
-            .arg("-E")
-            .arg("RUST_BACKTRACE")
-            .arg(&exec_path)
-            .arg(lnk_home)
-            .arg("--linkd-rpc-socket")
-            .arg(rpc_socket)
-            .arg("--push-seeds")
-            .arg("--fetch-seeds")
-            .arg("--linger-timeout")
-            .arg("10000")
-            .spawn()
-            .expect("lnk-gitd failed to start");
-            println!("started lnk-gitd");
-
+    Command::new("systemd-socket-activate")
+        .arg("-l")
+        .arg(port)
+        .arg("--fdname=ssh")
+        .arg("-E")
+        .arg("SSH_AUTH_SOCK")
+        .arg("-E")
+        .arg("RUST_BACKTRACE")
+        .arg(&exec_path)
+        .arg(lnk_home)
+        .arg("--linkd-rpc-socket")
+        .arg(rpc_socket)
+        .arg("--push-seeds")
+        .arg("--fetch-seeds")
+        .arg("--linger-timeout")
+        .arg("10000")
+        .spawn()
+        .expect("lnk-gitd failed to start");
+    println!("started lnk-gitd");
 }
 
 /// Returns true if this is the parent process,
